@@ -4,75 +4,88 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import static frc.robot.Constants.CANID.*;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+
+import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper;
+import com.swervedrivespecialties.swervelib.SwerveModule;
 
 public class Chassis extends SubsystemBase {
   /** Creates a new Chassis. */
 
   // Resources
-  // TalonSRX - https://store.ctr-electronics.com/content/api/java/html/classcom_1_1ctre_1_1phoenix_1_1motorcontrol_1_1can_1_1_talon_s_r_x.html
-  // CANCoder - https://store.ctr-electronics.com/content/api/java/html/classcom_1_1ctre_1_1phoenix_1_1sensors_1_1_c_a_n_coder.html
+  // Video - https://www.youtube.com/watch?v=0Xi9yb1IMyA
 
-  SwerveModule frontRight, frontLeft, backRight, backLeft;
+  SwerveModule m_frontRight, m_frontLeft, m_backRight, m_backLeft;
 
   SwerveDriveKinematics m_kinematics;
-  
+
+  ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
+
   public Chassis() {
     // Initialize swerve modules
-    frontRight = new SwerveModule(Constants.CANID.kFRd, Constants.CANID.kFRs, Constants.CANID.kFRe);
-    frontRight.d.setSelectedSensorPosition(0);
-    frontRight.s.setSelectedSensorPosition(0);
+    // http://gg.gg/swerve-drivetrain
 
-    frontLeft = new SwerveModule(Constants.CANID.kFLd, Constants.CANID.kFLs, Constants.CANID.kFLe);
-    frontLeft.d.setSelectedSensorPosition(0);
-    frontLeft.s.setSelectedSensorPosition(0);
+    m_frontRight = Mk3SwerveModuleHelper.createFalcon500(
+      Mk3SwerveModuleHelper.GearRatio.STANDARD,
+      kFRd,
+      kFRs,
+      kFRe,
+      // Encoder offset
+      0
+    );
 
-    backRight = new SwerveModule(Constants.CANID.kBRd, Constants.CANID.kBRs, Constants.CANID.kBRe);
-    backRight.d.setSelectedSensorPosition(0);
-    backRight.s.setSelectedSensorPosition(0);
+    m_frontLeft = Mk3SwerveModuleHelper.createFalcon500(
+      Mk3SwerveModuleHelper.GearRatio.STANDARD,
+      kFLd,
+      kFLs,
+      kFLe,
+      // Encoder offset
+      0
+    );
 
-    backLeft = new SwerveModule(Constants.CANID.kBLd, Constants.CANID.kBLs, Constants.CANID.kBLe);
-    backLeft.d.setSelectedSensorPosition(0);
-    backLeft.s.setSelectedSensorPosition(0);
+    m_backRight = Mk3SwerveModuleHelper.createFalcon500(
+      Mk3SwerveModuleHelper.GearRatio.STANDARD,
+      kBRd,
+      kBRs,
+      kBRe,
+      // Encoder offset
+      0
+    );
+
+    m_backLeft = Mk3SwerveModuleHelper.createFalcon500(
+      Mk3SwerveModuleHelper.GearRatio.STANDARD,
+      kBLd,
+      kBLs,
+      kBLe,
+      // Encoder offset
+      0
+    );
 
     // Initialize swerve drive kinematics
-    double y = Constants.CANID.xOffset, x = Constants.CANID.yOffset;
+    double y = xOffset, x = yOffset;
     m_kinematics = new SwerveDriveKinematics(
-      new Translation2d(x, y), new Translation2d(x, -y), new Translation2d(-x, y), new Translation2d(-x, -y)
-    );
+        new Translation2d(x, -y), new Translation2d(x, y), new Translation2d(-x, -y), new Translation2d(-x, y));
   }
 
-  public void setMovement(double xVelocity, double yVelocity, double turnRate){
-    ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, turnRate);
-    SwerveModuleState[] moduleStates = m_kinematics.toSwerveModuleStates(speeds);
-    
-    // Front left module state
-    SwerveModuleState frontLeftState = moduleStates[0];
-    frontLeftState = SwerveModuleState.optimize(frontLeftState, new Rotation2d(frontLeft.e.getPosition()));
-    Rotation2d a = frontLeftState.angle;
-    double b = frontLeftState.speedMetersPerSecond;
-    
-    // Front right module state
-    SwerveModuleState frontRightState = moduleStates[1];
-    frontRightState = SwerveModuleState.optimize(frontRightState, new Rotation2d(frontRight.e.getPosition()));
-    
-    // Back left module state
-    SwerveModuleState backLeftState = moduleStates[2];
-    backLeftState = SwerveModuleState.optimize(backLeftState, new Rotation2d(backLeft.e.getPosition()));
-    
-    // Back right module state
-    SwerveModuleState backRightState = moduleStates[3];
-    backRightState = SwerveModuleState.optimize(backRightState, new Rotation2d(backRight.e.getPosition()));
+  public void drive(ChassisSpeeds chassisSpeeds) {
+    m_chassisSpeeds = chassisSpeeds;
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
+    SwerveDriveKinematics.desaturateWheelSpeeds(states, maxVelocity);
+
+    m_frontRight.set(states[0].speedMetersPerSecond / maxVelocity * maxVoltage, states[0].angle.getRadians());
+    m_frontLeft.set(states[1].speedMetersPerSecond / maxVelocity * maxVoltage, states[1].angle.getRadians());
+    m_backRight.set(states[2].speedMetersPerSecond / maxVelocity * maxVoltage, states[2].angle.getRadians());
+    m_backLeft.set(states[3].speedMetersPerSecond / maxVelocity * maxVoltage, states[3].angle.getRadians());
   }
 }

@@ -16,6 +16,7 @@ public final class Constants {
     public static final class CANID {
         // FIND THESE LATER
 
+        // Note: encoder gets angle of steering
         // Front right drive/steer/encoder
         public static final int kFRd = 11;
         public static final int kFRs = 21;
@@ -40,5 +41,8 @@ public final class Constants {
         // yOffset is vertical offset from center
         public static final double xOffset = 0.4;
         public static final double yOffset = 0.3;
+
+        public static final double maxVelocity = 23;
+        public static final double maxVoltage = 12;
     }
 }
