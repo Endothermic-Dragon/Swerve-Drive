@@ -50,10 +50,12 @@ public final class Constants {
 
         // xOffset is horizontal offset from center
         // yOffset is vertical offset from center
-        public static final double xOffset = 0.4;
-        public static final double yOffset = 0.3;
+        public static final double kTrackWidth = 0.4;
+        public static final double kWheelBase = 0.3;
 
-        public static final double kMaxVelocity = 23;
         public static final double kMaxVoltage = 12;
+        public static final double kMaxVelocity = 23;
+        public static final double kMaxAngularVelocity =
+            2 * kMaxVelocity / Math.hypot(Constants.CANID.kTrackWidth, Constants.CANID.kWheelBase);
     }
 }
