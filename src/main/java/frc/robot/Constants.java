@@ -13,6 +13,17 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
+    public static final class Joystick {
+        // Move in x and y
+        public static final int leftStick = 0;
+
+        // Rotate in place
+        public static final int rightStick = 1;
+
+        // Unused for testing
+        public static final int xboxController = 2;
+    }
     public static final class CANID {
         // FIND THESE LATER
 
@@ -42,7 +53,7 @@ public final class Constants {
         public static final double xOffset = 0.4;
         public static final double yOffset = 0.3;
 
-        public static final double maxVelocity = 23;
-        public static final double maxVoltage = 12;
+        public static final double kMaxVelocity = 23;
+        public static final double kMaxVoltage = 12;
     }
 }
