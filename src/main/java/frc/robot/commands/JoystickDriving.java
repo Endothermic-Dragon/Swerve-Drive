@@ -30,10 +30,12 @@ public class JoystickDriving extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    new ChassisSpeeds(
-      m_driveJoystick.getX() * Constants.CANID.kMaxVelocity,
-      m_driveJoystick.getY() * Constants.CANID.kMaxVelocity,
-      m_steerJoystick.getX() * Constants.CANID.kMaxAngularVelocity
+    m_chassis.drive(
+      new ChassisSpeeds(
+        m_driveJoystick.getX() * Constants.CANID.kMaxVelocity,
+        m_driveJoystick.getY() * Constants.CANID.kMaxVelocity,
+        m_steerJoystick.getX() * Constants.CANID.kMaxAngularVelocity
+      )
     );
   }
 
