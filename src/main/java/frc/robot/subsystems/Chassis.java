@@ -69,10 +69,10 @@ public class Chassis extends SubsystemBase {
 
     // Initialize swerve drive kinematics
     m_kinematics = new SwerveDriveKinematics(
-        new Translation2d(kWheelBase/2, -kTrackWidth/2),
         new Translation2d(kWheelBase/2, kTrackWidth/2),
-        new Translation2d(-kWheelBase/2, -kTrackWidth/2),
-        new Translation2d(-kWheelBase/2, kTrackWidth/2)
+        new Translation2d(kWheelBase/2, -kTrackWidth/2),
+        new Translation2d(-kWheelBase/2, kTrackWidth/2),
+        new Translation2d(-kWheelBase/2, -kTrackWidth/2)
     );
   }
 
